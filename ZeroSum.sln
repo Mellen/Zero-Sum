@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C# Express 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroSumUI", "ZeroSumUI\ZeroSumUI.csproj", "{831CEBEC-728E-4CEF-B5B4-037F09E86AEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroSumGamePieces", "ZeroSumGamePieces\ZeroSumGamePieces.csproj", "{82DD1316-D85E-4131-8E1F-5912EE50B7F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroSumGame", "ZeroSumGame\ZeroSumGame.csproj", "{B0E8D2CB-3CCD-4053-9AAE-7F490439750A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{831CEBEC-728E-4CEF-B5B4-037F09E86AEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{831CEBEC-728E-4CEF-B5B4-037F09E86AEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{831CEBEC-728E-4CEF-B5B4-037F09E86AEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{831CEBEC-728E-4CEF-B5B4-037F09E86AEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82DD1316-D85E-4131-8E1F-5912EE50B7F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82DD1316-D85E-4131-8E1F-5912EE50B7F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82DD1316-D85E-4131-8E1F-5912EE50B7F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82DD1316-D85E-4131-8E1F-5912EE50B7F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0E8D2CB-3CCD-4053-9AAE-7F490439750A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0E8D2CB-3CCD-4053-9AAE-7F490439750A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0E8D2CB-3CCD-4053-9AAE-7F490439750A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0E8D2CB-3CCD-4053-9AAE-7F490439750A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
