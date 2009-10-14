@@ -12,12 +12,23 @@ namespace ZeroSumGamePieces
             this.index = index;
         }
     }
+    public class RemoveEventArgs : EventArgs
+    {
+        public Number number;
+        public RemoveEventArgs(Number number)
+        {
+            this.number = number;
+        }
+    }
+
     public enum NumberState { falling, stopped, remove };
     public class Number
     {
         public delegate void StopEventHandler(StopEventArgs e);
+        public delegate void RemoveEventHandler(RemoveEventArgs e);
         public event StopEventHandler StopEventRow;
         public event StopEventHandler StopEventColumn;
+        public event RemoveEventHandler OnRemove;
         public Label Display;
         private int value;
         public int Value
@@ -44,7 +55,15 @@ namespace ZeroSumGamePieces
                     StopEventColumn(new StopEventArgs(Row));
                     StopEventRow(new StopEventArgs(Column));
                 }
+                if (currentState == NumberState.remove)
+                {
+                    OnRemove(new RemoveEventArgs(this));
+                }
             }
+        }
+
+        public void BlankRemove(RemoveEventArgs e)
+        {
         }
 
         public override string ToString()
@@ -60,6 +79,7 @@ namespace ZeroSumGamePieces
 
         public Number(int val)
         {
+            OnRemove += BlankRemove;
             StopEventColumn += EmptyStopHandler;
             StopEventRow += EmptyStopHandler;
             value = val;

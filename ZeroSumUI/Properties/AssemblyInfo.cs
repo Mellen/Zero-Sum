@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NumbersGame")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Zero Sum")]
+[assembly: AssemblyDescription("A game of addition and subtraction.\r\n\r\nConcept and programming by Matthew Ellen.\r\n\r\nAdditional ideas from Collette Teasdale.\r\n\r\nThanks to experimentalgameplay.com for the inspiration.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Pointless Products inc.")]
-[assembly: AssemblyProduct("NumbersGame")]
-[assembly: AssemblyCopyright("Copyright © Pointless Products inc. 2009")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Zero Sum")]
+[assembly: AssemblyCopyright("Copyright © Matthew Ellen 2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

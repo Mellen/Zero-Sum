@@ -16,20 +16,19 @@ namespace NumbersGame
             game.MoveNumber += MoveCurrentNumber;
             game.GameOverEvent += GameOver;
             game.ScoreChange += ScoreUpdate;
-            game.RemoveEvent += RemoveNumbers;
+            game.HighScoreUpdate += HighScoreUpdate;
+            game.LevelUp += LevelUp;
             InitializeComponent();
             tmrPlay.Tick += game.GameStep;
             scMain.KeyUp += game.KeyUp;
+            lblHighScore.Text = game.HighScore.ToString();
         }
 
-        private void RemoveNumbers(ZeroSumEventArgs e)
+        private void RemoveNumber(RemoveEventArgs e)
         {
-            foreach (Number n in e.numbers)
+            if (pnlGame.Controls.Contains(e.number.Display))
             {
-                if (pnlGame.Controls.Contains(n.Display))
-                {
-                    pnlGame.Controls.Remove(n.Display);
-                }
+                pnlGame.Controls.Remove(e.number.Display);
             }
         }
 
@@ -40,6 +39,7 @@ namespace NumbersGame
             btnStart.Enabled = true;
             btnPause.Enabled = false;
             btnUnpause.Enabled = false;
+            btnRestart.Enabled = false;
         }
 
         private void ScoreUpdate(ScoreChangeEventArgs e)
@@ -54,7 +54,10 @@ namespace NumbersGame
             btnStart.Enabled = false;
             tmrPlay.Enabled = true;
             btnPause.Enabled = true;
-            scMain.Focus();
+            btnRestart.Enabled = true;
+            pnlGame.Focus();
+            scMain.Select();
+            
         }
 
         private void MoveCurrentNumber(LoadNumberEventArgs e)
@@ -68,6 +71,7 @@ namespace NumbersGame
         {
             Label loadedNum = new Label();
             Number n = e.EventNumber;
+            n.OnRemove += RemoveNumber;
             n.Display.Top = 0;
             n.Display.Parent = pnlGame;
             n.Display.Left = n.Column * (pnlGame.Width / Game.ColMax);
@@ -90,12 +94,61 @@ namespace NumbersGame
             btnUnpause.Enabled = false;
             btnPause.Enabled = true;
             lblPause.Visible = false;
-            scMain.Focus();
+            pnlGame.Focus();
+            scMain.Select();
         }
 
         private void scMain_Leave(object sender, EventArgs e)
         {
-            scMain.Focus();
+            scMain.Select();
+        }
+
+        private void HighScoreUpdate()
+        {
+            lblHighScore.Text = game.HighScore.ToString();
+        }
+
+        private void LevelUp(LevelUpArgs e)
+        {
+            if (tmrPlay.Interval > 40)
+            {
+                tmrPlay.Interval -= 10;
+            }
+            lblLevel.Text = e.level.ToString();
+        }
+
+        private void frmGame_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            game.GameOver();
+        }
+
+        private void btnRestart_Click(object sender, EventArgs e)
+        {
+            game.Restart();
+            btnStart_Click(sender, e);
+            scMain.Select();
+        }
+
+        private void btnAbout_Click(object sender, EventArgs e)
+        {
+            AboutBox1 ab = new AboutBox1();
+            ab.ShowDialog();
+            pnlGame.Focus();
+            scMain.Select();
+        }
+
+        private void btnHelp_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start("help.htm");
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Help file not found.");
+            }
+            pnlGame.Focus();
+            scMain.Select();
         }
     }
 }

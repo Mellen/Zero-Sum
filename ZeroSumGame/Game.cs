@@ -24,6 +24,15 @@ namespace ZeroSumGame
         }
     }
 
+    public class LevelUpArgs : EventArgs
+    {
+        public uint level;
+        public LevelUpArgs(uint level)
+        {
+            this.level = level;
+        }
+    }
+
     public enum GameState { stop, playing, pause }
 
     public class Game
@@ -31,14 +40,18 @@ namespace ZeroSumGame
         public const int RowMax = NumberHolder.ColMax;
         public const int ColMax = NumberHolder.RowMax;
         public const int MaxNumber = 9;
+        private const uint LevelUpScore = 70;
         public delegate void LoadNumberEventHandler(LoadNumberEventArgs e);
         public delegate void GameOverEventHandler();
         public delegate void ScoreChangeEventHandler(ScoreChangeEventArgs e);
+        public delegate void HighScoreUpdateHandler();
+        public delegate void LevelUpHandler(LevelUpArgs e);
         public event LoadNumberEventHandler LoadNumber;
         public event LoadNumberEventHandler MoveNumber;
         public event GameOverEventHandler GameOverEvent;
         public event ScoreChangeEventHandler ScoreChange;
-        public event NumberHolder.ZeroSumEventHandler RemoveEvent;
+        public event HighScoreUpdateHandler HighScoreUpdate;
+        public event LevelUpHandler LevelUp;
         private NumberHolder[] Rows;
         private NumberHolder[] Columns;
         private List<Number> Numbers;
@@ -46,6 +59,10 @@ namespace ZeroSumGame
         public Number NextNumber;
         private uint score;
         private uint highScore;
+        private uint numbersRemoved;
+        private uint blockWait;
+        private uint level;
+        private double blockRatio;
         public GameState currentState;
         public uint Score
         {
@@ -68,6 +85,18 @@ namespace ZeroSumGame
             ScoreChange(new ScoreChangeEventArgs(score));
         }
 
+        public void LevelUpCatch(LevelUpArgs e)
+        {
+            if (e.level > 1)
+            {
+                blockWait += Game.RowMax;
+                if (blockRatio < (1.0 / 5.0))
+                {
+                    blockRatio += 1.0 / 50.0;
+                }
+            }
+        }
+
         public Game()
         {
             highScore = LoadHighScore();
@@ -84,17 +113,11 @@ namespace ZeroSumGame
                 Columns[i] = new NumberHolder(NumberHolder.ColMax);
                 Columns[i].ZeroSum += ZeroSum;
             }
-            foreach (NumberHolder col in Columns)
-            {
-                foreach (NumberHolder row in Rows)
-                {
-                    row.ZeroSum += col.RemoveZeroSum;
-                    col.ZeroSum += row.RemoveZeroSum;
-                }
-            }
             LoadNumber += EmptyLoad;
             MoveNumber += EmptyLoad;
             GameOverEvent += GameOver;
+            HighScoreUpdate += SaveHighScore;
+            LevelUp += LevelUpCatch;
             Numbers = new List<Number>();
             GenerateNextNumber();
         }
@@ -118,6 +141,7 @@ namespace ZeroSumGame
         {
             System.IO.StreamWriter sw = new System.IO.StreamWriter("hs");
             sw.Write(highScore.ToString());
+            sw.Close();
         }
 
         private void ZeroSum(ZeroSumEventArgs e)
@@ -127,7 +151,6 @@ namespace ZeroSumGame
             {
                 increase += (uint)i;
                 e.numbers[i].CurrentState = NumberState.remove;
-                Columns[e.numbers[i].Column].SetFallingFromIndex(e.numbers[i].Row - 1);
             }
             IncreaseScore(increase);
         }
@@ -142,10 +165,24 @@ namespace ZeroSumGame
              */
         }
 
-        private void GameOver()
+        public void Restart()
+        {
+            GameOverEvent();
+        }
+
+        public void GameOver()
         {
             currentState = GameState.stop;
-            RemoveEvent(new ZeroSumEventArgs(Numbers));
+            foreach (NumberHolder nh in Columns)
+            {
+                for (int index = 0; index < nh.NumberCount; ++index)
+                {
+                    if (nh[index] != null)
+                    {
+                        nh[index].CurrentState = NumberState.remove;
+                    }
+                }
+            }
             Rows = new NumberHolder[Game.RowMax];
             for (int i = 0; i < Rows.Length; ++i)
             {
@@ -158,34 +195,42 @@ namespace ZeroSumGame
                 Columns[i] = new NumberHolder(NumberHolder.ColMax);
                 Columns[i].ZeroSum += ZeroSum;
             }
-            foreach (NumberHolder col in Columns)
-            {
-                foreach (NumberHolder row in Rows)
-                {
-                    row.ZeroSum += col.RemoveZeroSum;
-                    col.ZeroSum += row.RemoveZeroSum;
-                }
-            }
             Numbers = new List<Number>();
             CurrentNumber = null;
             NextNumber = null;
+            if (score > highScore)
+            {
+                highScore = score;
+                HighScoreUpdate();
+            }
             GenerateNextNumber();
         }
 
         private void GenerateNextNumber()
         {
             Random r = new Random();
-            int val = (int)Math.Ceiling(r.NextDouble() * Game.MaxNumber);
-            int signChance = (int)Math.Ceiling(r.NextDouble() * 2);
-            val = val * (signChance == 1 ? -1 : 1);
-            NextNumber = new Number(val);
+            bool dropBlock = (r.NextDouble() < blockRatio);
+            if (dropBlock && (level != 0))
+            {
+                NextNumber = new Block(blockWait);
+            }
+            else
+            {
+                int val = (int)Math.Ceiling(r.NextDouble() * Game.MaxNumber);
+                int signChance = (int)Math.Ceiling(r.NextDouble() * 2);
+                val = val * (signChance == 1 ? -1 : 1);
+                NextNumber = new Number(val);
+            }
             Numbers.Add(NextNumber);
-
         }
 
         public void Start()
         {
             score = 0;
+            blockWait = 230;
+            blockRatio = 1.0 / 20.0;
+            level = 0;
+            numbersRemoved = 0;
             currentState = GameState.playing;
             ScoreChange(new ScoreChangeEventArgs(score));
             LoadNewNumber();
@@ -193,9 +238,10 @@ namespace ZeroSumGame
 
         private void LoadNewNumber()
         {
+            Random r = new Random();
             CurrentNumber = NextNumber;
             CurrentNumber.Row = 0;
-            CurrentNumber.Column = ColMax / 2;
+            CurrentNumber.Column =  r.Next() % ColMax;
             CurrentNumber.CurrentState = NumberState.falling;
             bool didAddToRow = Rows[CurrentNumber.Row].AddNumber(CurrentNumber, CurrentNumber.Column);
             bool didAddToColumn = Columns[CurrentNumber.Column].AddNumber(CurrentNumber, CurrentNumber.Row);
@@ -207,9 +253,18 @@ namespace ZeroSumGame
             {
                 CurrentNumber.StopEventColumn += Columns[CurrentNumber.Column].Stop;
                 CurrentNumber.StopEventRow += Rows[CurrentNumber.Row].Stop;
+                CurrentNumber.OnRemove += Rows[CurrentNumber.Row].RemoveNumberEvent;
+                CurrentNumber.OnRemove += Columns[CurrentNumber.Column].RemoveNumberEvent;
+                CurrentNumber.OnRemove += this.RemoveNumber;
                 GenerateNextNumber();
                 LoadNumber(new LoadNumberEventArgs(CurrentNumber));
             }
+        }
+
+        public void RemoveNumber(RemoveEventArgs e)
+        {
+            Numbers.Remove(e.number);
+            IncreaseNumbersRemoved();
         }
 
         public void KeyUp(object sender, KeyEventArgs e)
@@ -231,6 +286,8 @@ namespace ZeroSumGame
                             Columns[CurrentNumber.Column].RemoveNumber(CurrentNumber.Row);
                             CurrentNumber.StopEventColumn -= Columns[CurrentNumber.Column].Stop;
                             CurrentNumber.StopEventColumn += Columns[col].Stop;
+                            CurrentNumber.OnRemove -= Columns[CurrentNumber.Column].RemoveNumberEvent;
+                            CurrentNumber.OnRemove += Columns[col].RemoveNumberEvent; 
                             Rows[CurrentNumber.Row].RemoveNumber(CurrentNumber.Column);
                             CurrentNumber.Column = col;
                             MoveNumber(new LoadNumberEventArgs(CurrentNumber));
@@ -251,6 +308,8 @@ namespace ZeroSumGame
                             Rows[CurrentNumber.Row].RemoveNumber(CurrentNumber.Column);
                             CurrentNumber.StopEventRow -= Rows[CurrentNumber.Row].Stop;
                             CurrentNumber.StopEventRow += Rows[row].Stop;
+                            CurrentNumber.OnRemove -= Rows[CurrentNumber.Row].RemoveNumberEvent;
+                            CurrentNumber.OnRemove += Rows[row].RemoveNumberEvent; 
                             Columns[CurrentNumber.Column].RemoveNumber(CurrentNumber.Row);
                             CurrentNumber.Row = row;
                             MoveNumber(new LoadNumberEventArgs(CurrentNumber));
@@ -277,62 +336,66 @@ namespace ZeroSumGame
         {
             if (currentState == GameState.playing)
             {
-                foreach (Number n in Numbers)
+                foreach (NumberHolder nh in Columns)
                 {
-                    if (n.CurrentState == NumberState.falling)
+                    for (int index = nh.NumberCount - 1; index > -1 ; --index)
                     {
-                        if (n.Row == (Game.RowMax - 1))
+                        if (nh[index] != null)
                         {
-                            n.CurrentState = NumberState.stopped;
-                        }
-                        else
-                        {
-                            int row = n.Row;
-                            ++row;
-                            bool didAddToRow = Rows[row].AddNumber(n, n.Column);
-                            bool didAddToColumn = Columns[n.Column].AddNumber(n, row);
-                            if (didAddToRow && didAddToColumn)
+                            if (nh[index].CurrentState == NumberState.falling)
                             {
-                                Rows[n.Row].RemoveNumber(n.Column);
-                                n.StopEventRow -= Rows[n.Row].Stop;
-                                n.StopEventRow += Rows[row].Stop;
-                                Columns[n.Column].RemoveNumber(n.Row);
-                                n.Row = row;
-                                MoveNumber(new LoadNumberEventArgs(n));
+                                if (nh[index].Row == (Game.RowMax - 1))
+                                {
+                                    nh[index].CurrentState = NumberState.stopped;
+                                }
+                                else
+                                {
+                                    Number n = nh[index];
+                                    int row = n.Row;
+                                    ++row;
+                                    bool didAddToRow = Rows[row].AddNumber(n, n.Column);
+                                    bool didAddToColumn = Columns[n.Column].AddNumber(n, row);
+                                    if (didAddToRow && didAddToColumn)
+                                    {
+                                        Rows[n.Row].RemoveNumber(n.Column);
+                                        n.StopEventRow -= Rows[n.Row].Stop;
+                                        n.OnRemove -= Rows[n.Row].RemoveNumberEvent;
+                                        n.StopEventRow += Rows[row].Stop;
+                                        n.OnRemove += Rows[row].RemoveNumberEvent;
+                                        Columns[n.Column].RemoveNumber(n.Row);
+                                        n.Row = row;
+                                        MoveNumber(new LoadNumberEventArgs(n));
+                                    }
+                                    else
+                                    {
+                                        n.CurrentState = NumberState.stopped;
+                                    }
+                                }
                             }
-                            else
+                            if ((nh[index] != null)&&(nh[index] is Block))
                             {
-                                n.CurrentState = NumberState.stopped;
+                                ((Block)nh[index]).DecreaseTurns();
                             }
                         }
 
                     }
                 }
 
-                if (CurrentNumber.CurrentState == NumberState.stopped)
+                if (CurrentNumber.CurrentState != NumberState.falling)
                 {
                     CurrentNumber = null;
                     LoadNewNumber();
                 }
+            }
+        }
 
-                Number[] temp = new Number[Numbers.Count];
-                Numbers.CopyTo(temp);
-                List<Number> removals = new List<Number>();
-
-                foreach (Number n in temp)
-                {
-                    if (n.CurrentState == NumberState.remove)
-                    {
-                        Numbers.Remove(n);
-                        removals.Add(n);
-                    }
-                }
-
-                if (removals.Count > 0)
-                {
-                    RemoveEvent(new ZeroSumEventArgs(removals));
-                    LoadNewNumber();
-                }
+        private void IncreaseNumbersRemoved()
+        {
+            ++numbersRemoved;
+            if (numbersRemoved % Game.LevelUpScore == 0)
+            {
+                ++level;
+                LevelUp(new LevelUpArgs(level));
             }
         }
     }

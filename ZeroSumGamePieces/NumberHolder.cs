@@ -18,11 +18,25 @@ namespace ZeroSumGamePieces
         public delegate void ZeroSumEventHandler(ZeroSumEventArgs e);
         public event ZeroSumEventHandler ZeroSum;
         private Number[] numbers;
+        public int NumberCount
+        {
+            get
+            {
+                return numbers.Length;
+            }
+        }
+
+        public Number this[int index]
+        {
+            get
+            {
+                return numbers[index];
+            }
+        }
 
         public NumberHolder(int MaxNumbers)
         {
             numbers = new Number[MaxNumbers];
-            this.ZeroSum += RemoveZeroSum;
         }
 
         public void SetFallingFromIndex(int index)
@@ -44,14 +58,19 @@ namespace ZeroSumGamePieces
             return result;
         }
 
-        public void RemoveZeroSum(ZeroSumEventArgs e)
+        public void RemoveNumberEvent(RemoveEventArgs e)
         {
-            for(int i = 0; i < numbers.Length; ++i)
+            int index = 0;
+            bool found = false;
+            while((index < numbers.Length)&&(!found))
             {
-                if (e.numbers.Contains(numbers[i]))
+                if (numbers[index] == e.number)
                 {
-                    numbers[i] = null;
+                    numbers[index] = null;
+                    found = true;
+                    SetFallingFromIndex(index);
                 }
+                ++index;
             }
         }
 
@@ -66,10 +85,10 @@ namespace ZeroSumGamePieces
                 sum = Start.Value;
             }
             List<Number> gonners = new List<Number>();
-            while ((Start != null) && (sum != 0) && (index > -1))
+            while ((Start != null) && (Start.Value != 0) && (sum != 0) && (index > -1))
             {
                 sum = Start.Value;
-                while ((nextIndex < numbers.Length) && (sum != 0) && (numbers[nextIndex] != null))
+                while ((nextIndex < numbers.Length) && (sum != 0) && (numbers[nextIndex] != null) && (numbers[nextIndex].Value != 0))
                 {
                     sum += numbers[nextIndex].Value;
                     if (sum == 0)
