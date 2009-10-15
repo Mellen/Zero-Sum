@@ -7,8 +7,14 @@ using System.Windows.Forms;
 
 namespace NumbersGame
 {
+    /// <summary>
+    /// Form that shows details about the game.
+    /// </summary>
     partial class AboutBox1 : Form
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public AboutBox1()
         {
             InitializeComponent();

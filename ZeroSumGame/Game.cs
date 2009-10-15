@@ -35,6 +35,9 @@ namespace ZeroSumGame
 
     public enum GameState { stop, playing, pause }
 
+    /// <summary>
+    /// Control class for Zero Sum game.
+    /// </summary>
     public class Game
     {
         public const int RowMax = NumberHolder.ColMax;
@@ -79,12 +82,21 @@ namespace ZeroSumGame
             }
         }
 
+        /// <summary>
+        /// Increases the score.
+        /// Triggers a scor change event.
+        /// </summary>
+        /// <param name="amount">how much the score has changed</param>
         private void IncreaseScore(uint amount)
         {
             score += amount;
             ScoreChange(new ScoreChangeEventArgs(score));
         }
 
+        /// <summary>
+        /// Catches LevelUp events.
+        /// </summary>
+        /// <param name="e">Contains the current level of the game</param>
         public void LevelUpCatch(LevelUpArgs e)
         {
             if (e.level > 1)
@@ -97,6 +109,10 @@ namespace ZeroSumGame
             }
         }
 
+        /// <summary>
+        /// Constructor.
+        /// Creates all the necessary objects and attches all initial event handlers.
+        /// </summary>
         public Game()
         {
             highScore = LoadHighScore();
@@ -122,6 +138,10 @@ namespace ZeroSumGame
             GenerateNextNumber();
         }
 
+        /// <summary>
+        /// Loads the high scor from a file, if there is one, or sets the value to 21.
+        /// </summary>
+        /// <returns>High Score value</returns>
         private uint LoadHighScore()
         {
             if (System.IO.File.Exists("hs"))
@@ -137,6 +157,9 @@ namespace ZeroSumGame
             }
         }
 
+        /// <summary>
+        /// Saves the high score
+        /// </summary>
         private void SaveHighScore()
         {
             System.IO.StreamWriter sw = new System.IO.StreamWriter("hs");
@@ -144,6 +167,11 @@ namespace ZeroSumGame
             sw.Close();
         }
 
+        /// <summary>
+        /// Catches zero sum events fired by a number holder.
+        /// Increases the score and sets the state of the numbers passed in e to remove.
+        /// </summary>
+        /// <param name="e">Includes a list of numbers that causd the zero sum event</param>
         private void ZeroSum(ZeroSumEventArgs e)
         {
             uint increase = 0;
@@ -155,6 +183,10 @@ namespace ZeroSumGame
             IncreaseScore(increase);
         }
 
+        /// <summary>
+        /// Empty load
+        /// </summary>
+        /// <param name="e"></param>
         private void EmptyLoad(LoadNumberEventArgs e)
         {
             /*
@@ -165,11 +197,18 @@ namespace ZeroSumGame
              */
         }
 
+        /// <summary>
+        /// Restarts the game
+        /// </summary>
         public void Restart()
         {
             GameOverEvent();
         }
 
+        /// <summary>
+        /// End the current game.
+        /// Sets up the game object for a new game.
+        /// </summary>
         public void GameOver()
         {
             currentState = GameState.stop;
@@ -206,6 +245,9 @@ namespace ZeroSumGame
             GenerateNextNumber();
         }
 
+        /// <summary>
+        /// Determines what comes next.
+        /// </summary>
         private void GenerateNextNumber()
         {
             Random r = new Random();
@@ -224,6 +266,9 @@ namespace ZeroSumGame
             Numbers.Add(NextNumber);
         }
 
+        /// <summary>
+        /// Starts the game off.
+        /// </summary>
         public void Start()
         {
             score = 0;
@@ -236,6 +281,10 @@ namespace ZeroSumGame
             LoadNewNumber();
         }
 
+        /// <summary>
+        /// Sets up the next number to drop into the UI.
+        /// Determines if the game is over.
+        /// </summary>
         private void LoadNewNumber()
         {
             Random r = new Random();
@@ -261,12 +310,22 @@ namespace ZeroSumGame
             }
         }
 
+        /// <summary>
+        /// Catches Number.OnRemove events.
+        /// Removes the Number in e from the game.
+        /// </summary>
+        /// <param name="e">contains the number to be removed</param>
         public void RemoveNumber(RemoveEventArgs e)
         {
             Numbers.Remove(e.number);
             IncreaseNumbersRemoved();
         }
 
+        /// <summary>
+        /// Moves the numbers around the columns and rows.
+        /// </summary>
+        /// <param name="sender">Object that sent the request</param>
+        /// <param name="e">Keys that were pushed</param>
         public void KeyUp(object sender, KeyEventArgs e)
         {
             if ((CurrentNumber != null) && (currentState == GameState.playing)&&(CurrentNumber.CurrentState == NumberState.falling))
@@ -332,6 +391,12 @@ namespace ZeroSumGame
             }
         }
 
+        /// <summary>
+        /// Moves all moving Numbers.
+        /// Updates all Blocks.
+        /// </summary>
+        /// <param name="sender">object who sent the request</param>
+        /// <param name="e">Event arguments</param>
         public void GameStep(object sender, EventArgs e)
         {
             if (currentState == GameState.playing)
@@ -389,6 +454,9 @@ namespace ZeroSumGame
             }
         }
 
+        /// <summary>
+        /// Increases the countof numbers removed, and triggers a level up if the count is high enough. 
+        /// </summary>
         private void IncreaseNumbersRemoved()
         {
             ++numbersRemoved;

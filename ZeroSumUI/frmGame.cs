@@ -6,6 +6,9 @@ using ZeroSumGamePieces;
 
 namespace NumbersGame
 {
+    /// <summary>
+    /// User Interface for the Zero Sum game.
+    /// </summary>
     public partial class frmGame : Form
     {
         private Game game;
@@ -24,6 +27,10 @@ namespace NumbersGame
             lblHighScore.Text = game.HighScore.ToString();
         }
 
+        /// <summary>
+        /// Event handler for Number OnRemove events.
+        /// </summary>
+        /// <param name="e">Contains the Number that's fired the event</param>
         private void RemoveNumber(RemoveEventArgs e)
         {
             if (pnlGame.Controls.Contains(e.number.Display))
@@ -32,6 +39,9 @@ namespace NumbersGame
             }
         }
 
+        /// <summary>
+        /// Called when the game is over.
+        /// </summary>
         private void GameOver()
         {
             lblGameOver.Visible = true;
@@ -42,11 +52,20 @@ namespace NumbersGame
             btnRestart.Enabled = false;
         }
 
+        /// <summary>
+        /// Updates the score dislayed.
+        /// </summary>
+        /// <param name="e">Contains the new score</param>
         private void ScoreUpdate(ScoreChangeEventArgs e)
         {
             lblScore.Text = e.NewScore.ToString();
         }
 
+        /// <summary>
+        /// Starts the game.
+        /// </summary>
+        /// <param name="sender">Sender of the request</param>
+        /// <param name="e">Event arguments</param>
         private void btnStart_Click(object sender, EventArgs e)
         {
             lblGameOver.Visible = false;
@@ -60,6 +79,10 @@ namespace NumbersGame
             
         }
 
+        /// <summary>
+        /// Places the number on the screen.
+        /// </summary>
+        /// <param name="e">Contains the number being moved</param>
         private void MoveCurrentNumber(LoadNumberEventArgs e)
         {
             Number n = e.EventNumber;
@@ -67,6 +90,10 @@ namespace NumbersGame
             n.Display.Top = n.Row * (pnlGame.Height / Game.RowMax);
         }
 
+        /// <summary>
+        /// Loads the number onto the screen.
+        /// </summary>
+        /// <param name="e">Contains the number being loaded</param>
         private void LoadNextNumber(LoadNumberEventArgs e)
         {
             Label loadedNum = new Label();
@@ -78,6 +105,11 @@ namespace NumbersGame
             lblNextNumber.Text = game.NextNumber.ToString();
         }
 
+        /// <summary>
+        /// Pauses the game.
+        /// </summary>
+        /// <param name="sender">Object that send the request</param>
+        /// <param name="e">Event arguments</param>
         private void btnPause_Click(object sender, EventArgs e)
         {
             tmrPlay.Enabled = false;
@@ -87,6 +119,11 @@ namespace NumbersGame
             lblPause.Visible = true;
         }
 
+        /// <summary>
+        /// Resumes the game.
+        /// </summary>
+        /// <param name="sender">Object that send the request</param>
+        /// <param name="e">Event arguments</param>
         private void btnUnpause_Click(object sender, EventArgs e)
         {
             tmrPlay.Enabled = true;
@@ -103,11 +140,18 @@ namespace NumbersGame
             scMain.Select();
         }
 
+        /// <summary>
+        /// Updates the High Score display.
+        /// </summary>
         private void HighScoreUpdate()
         {
             lblHighScore.Text = game.HighScore.ToString();
         }
 
+        /// <summary>
+        /// Updates the Level display and speeds up the game.
+        /// </summary>
+        /// <param name="e">Contains the value of the new level</param>
         private void LevelUp(LevelUpArgs e)
         {
             if (tmrPlay.Interval > 40)
@@ -117,11 +161,22 @@ namespace NumbersGame
             lblLevel.Text = e.level.ToString();
         }
 
+        /// <summary>
+        /// Handles the OnClose even.
+        /// Makes sure the game ends.
+        /// </summary>
+        /// <param name="sender">Object that send the request</param>
+        /// <param name="e">Event arguments</param>
         private void frmGame_FormClosed(object sender, FormClosedEventArgs e)
         {
             game.GameOver();
         }
 
+        /// <summary>
+        /// Restarts the game.
+        /// </summary>
+        /// <param name="sender">Object that send the request</param>
+        /// <param name="e">Event arguments</param>
         private void btnRestart_Click(object sender, EventArgs e)
         {
             game.Restart();
@@ -129,6 +184,11 @@ namespace NumbersGame
             scMain.Select();
         }
 
+        /// <summary>
+        /// Loads the about box.
+        /// </summary>
+        /// <param name="sender">Object that send the request</param>
+        /// <param name="e">Event arguments</param>
         private void btnAbout_Click(object sender, EventArgs e)
         {
             AboutBox1 ab = new AboutBox1();
@@ -137,6 +197,11 @@ namespace NumbersGame
             scMain.Select();
         }
 
+        /// <summary>
+        /// Loads the help file.
+        /// </summary>
+        /// <param name="sender">Object that send the request</param>
+        /// <param name="e">Event arguments</param>
         private void btnHelp_Click(object sender, EventArgs e)
         {
             try

@@ -22,6 +22,10 @@ namespace ZeroSumGamePieces
     }
 
     public enum NumberState { falling, stopped, remove };
+
+    /// <summary>
+    /// Primary game piece.
+    /// </summary>
     public class Number
     {
         public delegate void StopEventHandler(StopEventArgs e);
@@ -41,6 +45,11 @@ namespace ZeroSumGamePieces
         public int Row;
         public int Column;
         private NumberState currentState;
+        /// <summary>
+        /// Accessor for the current state of the number.
+        /// Fires a Stop event if the state becomes stopped.
+        /// Fires an OnRemove event if the state becomes remove.
+        /// </summary>
         public NumberState CurrentState
         {
             get
@@ -66,6 +75,10 @@ namespace ZeroSumGamePieces
         {
         }
 
+        /// <summary>
+        /// Outputs the string value for the Number.
+        /// </summary>
+        /// <returns>Value of the Number</returns>
         public override string ToString()
         {
             string val = (value > 0) ? "+" + value.ToString() : value.ToString();
@@ -77,6 +90,11 @@ namespace ZeroSumGamePieces
 
         }
 
+        /// <summary>
+        /// Constructor.
+        /// Set event handlers and creates the label for viewing the Number.
+        /// </summary>
+        /// <param name="val">Value for the number</param>
         public Number(int val)
         {
             OnRemove += BlankRemove;

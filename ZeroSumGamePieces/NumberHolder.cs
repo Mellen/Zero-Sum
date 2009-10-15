@@ -11,6 +11,10 @@ namespace ZeroSumGamePieces
             this.numbers = numbers;
         }
     }
+
+    /// <summary>
+    /// A container for Number objects
+    /// </summary>
     public class NumberHolder
     {
         public const int RowMax = 6;
@@ -34,11 +38,20 @@ namespace ZeroSumGamePieces
             }
         }
 
+        /// <summary>
+        /// Contrsuctor.
+        /// Creates a new array of numbers.
+        /// </summary>
+        /// <param name="MaxNumbers">Size of the array</param>
         public NumberHolder(int MaxNumbers)
         {
             numbers = new Number[MaxNumbers];
         }
 
+        /// <summary>
+        /// Sets the states of all the numbers below and including index to falling.
+        /// </summary>
+        /// <param name="index">Index of the first number to set to falling</param>
         public void SetFallingFromIndex(int index)
         {
             while (index > -1)
@@ -51,6 +64,11 @@ namespace ZeroSumGamePieces
             }
         }
 
+        /// <summary>
+        /// Removes a number from the numbers array
+        /// </summary>
+        /// <param name="index">Index of the number to be removed</param>
+        /// <returns>The number that's been removed</returns>
         public Number RemoveNumber(int index)
         {
             Number result = numbers[index];
@@ -58,6 +76,11 @@ namespace ZeroSumGamePieces
             return result;
         }
 
+        /// <summary>
+        /// Event handler for Number.OnRemove.
+        /// Removes a number the numbrs array.
+        /// </summary>
+        /// <param name="e">Number to be removed</param>
         public void RemoveNumberEvent(RemoveEventArgs e)
         {
             int index = 0;
@@ -74,6 +97,11 @@ namespace ZeroSumGamePieces
             }
         }
 
+        /// <summary>
+        /// Event handler for Number Stop events.
+        /// Checks if a zero sum has been made. If one has the a ZeroSum event is raised.
+        /// </summary>
+        /// <param name="e">Contains the index of the number that has stopped</param>
         public void Stop(StopEventArgs e)
         {
             int index = e.index;
@@ -113,6 +141,12 @@ namespace ZeroSumGamePieces
             }
         }
 
+        /// <summary>
+        /// Tries to add a number to the numbers array.
+        /// </summary>
+        /// <param name="number">Number to add to the array</param>
+        /// <param name="index">Array index to add the Number at</param>
+        /// <returns>True if the number gets added, else false</returns>
         public bool AddNumber(Number number, int index)
         {
             if (numbers[index] == null)
