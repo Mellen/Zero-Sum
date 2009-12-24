@@ -275,6 +275,7 @@ namespace ZeroSumGame
             blockWait = 230;
             blockRatio = 1.0 / 20.0;
             level = 0;
+            LevelUp(new LevelUpArgs(level));
             numbersRemoved = 0;
             currentState = GameState.playing;
             ScoreChange(new ScoreChangeEventArgs(score));
